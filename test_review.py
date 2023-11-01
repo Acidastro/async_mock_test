@@ -19,3 +19,4 @@ async def test_my_function(mock_find):
     print(result)
     assert result == ["test_value"]
     mock_find.assert_called_once()
+    mock_find.assert_called()
