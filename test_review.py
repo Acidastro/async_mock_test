@@ -1,22 +1,20 @@
 from unittest.mock import AsyncMock, patch
 
-
-async def foo():
-    match = {'phone': "7988866325418"}
-    result = [x async for x in await FindReqDB(match).find()]
-    return result
+import pytest
 
 
-@patch('database.api.FindReqDB.find', new_callable=AsyncMock)
+@pytest.mark.parametrize(
+    ('text', 'review', 'status'), [
+        ('Первый тестовый текст, поэтому мне всё понравилось', True, 'Next estimate step send'),
+    ])
+@patch('review_module.review.send_tmsg_to_queue', new_callable=AsyncMock)
+@patch('review_module.review.send_message_to_queue', new_callable=AsyncMock)
 @pytest.mark.asyncio
-async def test_my_function(mock_find):
-    async def async_generator():
-        yield "test_value"
-
-    mock_find.return_value = async_generator()
-
-    result = await foo()
-    print(result)
-    assert result == ["test_value"]
-    mock_find.assert_called_once()
-    mock_find.assert_called()
+async def test_check_review_positive(
+        send_message_to_queue,
+        send_tmsg_to_queue,
+        text, review, status, mock_class_review):
+    """ EST TEST 1 step (est, est, wait_comment) with {} """
+    res = await mock_class_review.check_review(text)
+    assert res.ok == review
+    assert res.status == status
