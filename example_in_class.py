@@ -1,10 +1,17 @@
 @pytest.fixture
-def fixture_mock_get_by_id_client_1():
+def fixture_mock_conn_none():
+    with patch.object(CheckMsg, 'conn', new_callable=PropertyMock(return_value=None)):
+        yield
+
+
+@pytest.fixture
+def fixture_mock_get_by_id_client_1(fixture_mock_conn_none):
+    """  патч get_by_id на возврат файла и патч CheckMsg self.conn на None """
     mock_get_by_id = Mock()
     mock_get_by_id.return_value = get_file(path_ + 'client_categories_1.json')
-    with patch.object(Clients, 'get_by_id', new=mock_get_by_id), \
-            patch.object(CheckMsg, 'conn', new_callable=PropertyMock(return_value=None)):
+    with patch.object(Clients, 'get_by_id', new=mock_get_by_id):
         yield
+
 
 @pytest.mark.asyncio
 async def test_check_client_category_1(fixture_mock_get_by_id_client_1):
