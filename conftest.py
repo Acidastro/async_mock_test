@@ -12,6 +12,22 @@ from utilities.models import RecordHook
 path_ = 'data/'
 # path_ = 'review_module/tests/data/'
 
+@pytest.fixture
+def fixture_mock_db_manager(fixture_mock_get_records_for_phones):
+    with patch('sendout.sendout_core.sendout_analyze.SendoutManagerDB', new_callable=Mock) as _mock:
+        _mock.return_value = fixture_mock_get_records_for_phones
+        yield _mock
+
+
+@pytest.fixture
+def fixture_mock_get_records_for_phones():
+    file = get_file(_path + "records_for_phones.json")
+    file.sort(key=lambda x: x['datetime'], reverse=True)
+
+    records_for_phones = AsyncMock()
+    records_for_phones.get_records_for_phones.return_value = file
+    return records_for_phones
+
 
 @pytest.fixture
 def client_review():
